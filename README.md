@@ -12,8 +12,8 @@
 | 游戏名称 | 简介 | 适合年龄 | 在线玩 |
 |---------|------|----------|--------|
 | 五子棋  | 人弈，先连成五子者胜 | 5岁+ | [🎮 部署中](https://XipoBuilder.github.io/Playful/gomoku/) |
-| 接宝石 |  接住了宝石得分 | 6岁+ | [🎮 部署中](https://XipoBuilder.github.io/Playful/chengyu-quiz/) |
-| 贪吃蛇 | 经典小游戏 | 4岁+ | [🎮 部署中](https://XipoBuilder.github.io/Playful/word-match/) |
+| 接宝石 |  接住了宝石得分 | 6岁+ | [🎮 部署中](https://XipoBuilder.github.io/Playful/catchGems/) |
+| 贪吃蛇 | 经典小游戏 | 4岁+ | [🎮 部署中](https://XipoBuilder.github.io/Playful/snakeGame/) |
 | 识字配对 | 汉字与图片配对，认字小高手 | 4岁+ | [🎮 部署中](https://XipoBuilder.github.io/Playful/word-match/) |
 | 乘法挑战 | 限时口算，巩固乘法口诀 | 7岁+ | [🎮 部署中](https://XipoBuilder.github.io/Playful/multiply/) |
 
