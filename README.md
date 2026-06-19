@@ -11,11 +11,11 @@
 
 | 游戏名称 | 简介 | 适合年龄 | 在线玩 |
 |---------|------|----------|--------|
-| 五子棋  | 人弈，先连成五子者胜 | 5岁+ | [🎮 部署中](https://XipoBuilder.github.io/Playful/gomoku/) |
-| 接宝石 |  接住了宝石得分 | 6岁+ | [🎮 部署中](https://XipoBuilder.github.io/Playful/catchGems/) |
-| 贪吃蛇 | 经典小游戏 | 4岁+ | [🎮 部署中](https://XipoBuilder.github.io/Playful/snakeGame/) |
-| 识字配对 | 汉字与图片配对，认字小高手 | 4岁+ | [🎮 部署中](https://XipoBuilder.github.io/Playful/word-match/) |
-| 乘法挑战 | 限时口算，巩固乘法口诀 | 7岁+ | [🎮 部署中](https://XipoBuilder.github.io/Playful/multiply/) |
+| 五子棋  | 人弈，先连成五子者胜 | 5岁+ | [🎮 试玩](https://XipoBuilder.github.io/Playful/gomoku/) |
+| 接宝石 |  接住了宝石得分 | 6岁+ | [🎮 试玩](https://XipoBuilder.github.io/Playful/catchGems/) |
+| 贪吃蛇 | 经典小游戏 | 4岁+ | [🎮 试玩](https://XipoBuilder.github.io/Playful/snakeGame/) |
+| 乘法挑战 | 限时口算，巩固乘法口诀 | 7岁+ | [🎮 试玩](https://XipoBuilder.github.io/Playful/timesTableTrip/) |
+| 认字高手 | 汉字与图片配对，认字小高手 | 4岁+ | [🎮 部署中](https://XipoBuilder.github.io/Playful//) |
 
 > 更多游戏陆续添加，欢迎提出建议。
 
@@ -38,10 +38,10 @@ open index.html   # 或双击
 
 ```
 Playful/
-├── gomoku/             # 五子棋
-├── chengyu-quiz/       # 成语填字
-├── word-match/         # 识字配对
-├── multiply/           # 乘法挑战
+├── gomoku/            # 五子棋
+├── catchGems/         # 接宝石
+├── snakeGame/         # 贪吃蛇
+├── timesTableTrip/    # 乘法口诀挑战者
 └── README.md
 ```
 
