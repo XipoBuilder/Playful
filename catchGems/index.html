@@ -1,0 +1,965 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🎯 接色小游戏 - 完全版</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(145deg, #0b1a2e, #1a2f3f);
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            touch-action: none;
+        }
+        .game-wrapper {
+            background: #1e3a4d;
+            padding: 20px 20px 25px;
+            border-radius: 48px;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.7), inset 0 2px 0 rgba(255, 255, 255, 0.1);
+            width: fit-content;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            width: 400px;
+            height: 600px;
+            border-radius: 24px;
+            background: radial-gradient(circle at 20% 20%, #2b4b5e, #11232e);
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.6);
+            cursor: none;
+            touch-action: none;
+        }
+        .status-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            padding: 0 6px;
+            color: #c1d9e8;
+            font-weight: 600;
+            font-size: 16px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            gap: 6px;
+        }
+        .status-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 14px;
+            border-radius: 40px;
+            backdrop-filter: blur(2px);
+            white-space: nowrap;
+        }
+        .target-label {
+            background: rgba(255, 50, 50, 0.25);
+            border: 1px solid #ff6b6b;
+            color: #ff9e9e;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .ctrl-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #c1d9e8;
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            backdrop-filter: blur(2px);
+        }
+        .ctrl-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: #f5c542;
+        }
+        .ctrl-btn.active {
+            background: #f5c542;
+            border-color: #f5c542;
+            color: #1e2f3a;
+        }
+        .restart-btn {
+            background: #f5c542;
+            border: none;
+            color: #1e2f3a;
+            font-weight: 700;
+            padding: 4px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #a07d2a, 0 6px 12px rgba(0,0,0,0.3);
+            transition: all 0.07s ease;
+            font-size: 16px;
+        }
+        .restart-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #a07d2a;
+        }
+        .restart-btn:hover { background: #ffd966; }
+
+        .settings-panel {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px 16px;
+            margin-top: 14px;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 40px;
+            backdrop-filter: blur(4px);
+            color: #d4e6f0;
+            font-weight: 500;
+            font-size: 13px;
+        }
+        .setting-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .setting-item label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .setting-item input[type="range"] {
+            width: 70px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #4f7f96;
+            border-radius: 4px;
+            outline: none;
+        }
+        .setting-item input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #f5c542;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+        .setting-item input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #f5c542;
+            cursor: pointer;
+            border: none;
+        }
+        .value-display {
+            min-width: 22px;
+            text-align: center;
+            font-weight: 700;
+            color: #f5c542;
+            font-size: 13px;
+        }
+        .preset-buttons {
+            display: flex;
+            gap: 6px;
+        }
+        .preset-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #c1d9e8;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .preset-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: #f5c542;
+            color: #fff;
+        }
+        .preset-btn.active {
+            background: #f5c542;
+            border-color: #f5c542;
+            color: #1e2f3a;
+            box-shadow: 0 2px 10px rgba(245, 197, 66, 0.3);
+        }
+        .custom-check {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #c1d9e8;
+            cursor: pointer;
+        }
+        .custom-check input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #f5c542;
+            cursor: pointer;
+        }
+        @media (max-width: 500px) {
+            .game-wrapper { padding: 12px; border-radius: 28px; }
+            canvas { width: 340px; height: 510px; }
+            .status-bar { font-size: 13px; justify-content: center; }
+            .settings-panel { flex-direction: column; align-items: stretch; gap: 8px; padding: 14px; }
+            .setting-item { justify-content: space-between; }
+            .setting-item input[type="range"] { width: 100px; }
+            .preset-buttons { justify-content: center; }
+            .btn-group { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-wrapper">
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <div class="status-bar">
+        <span class="status-item">💎 得分 <span id="scoreDisplay">0</span></span>
+        <span class="status-item">🏆 关卡 <span id="levelDisplay">1</span></span>
+        <span class="status-item">🏅 最高 <span id="highScoreDisplay">0</span></span>
+        <span class="status-item target-label">🎯 目标：红色 ★</span>
+        <div class="btn-group">
+            <button class="ctrl-btn" id="pauseBtn">⏸️ 暂停</button>
+            <button class="restart-btn" id="restartButton">↻ 新一局</button>
+        </div>
+    </div>
+
+    <div class="settings-panel">
+        <!-- 自动升级开关 -->
+        <div class="custom-check">
+            <input type="checkbox" id="autoLevelCheck" checked>
+            <label for="autoLevelCheck">🔄 自动升级</label>
+        </div>
+        <!-- 各滑块 -->
+        <div class="setting-item">
+            <label>🐢 速度 <span class="value-display" id="speedValue">2.0</span></label>
+            <input type="range" id="speedSlider" min="0.8" max="6.0" step="0.2" value="2.0">
+        </div>
+        <div class="setting-item">
+            <label>📦 密度 <span class="value-display" id="densityValue">0.035</span></label>
+            <input type="range" id="densitySlider" min="0.005" max="0.100" step="0.002" value="0.035">
+        </div>
+        <div class="setting-item">
+            <label>🔴 红色概率 <span class="value-display" id="redProbValue">0.20</span></label>
+            <input type="range" id="redProbSlider" min="0.05" max="0.70" step="0.02" value="0.20">
+        </div>
+        <div class="setting-item">
+            <label>📉 底线 <span class="value-display" id="thresholdValue">-50</span></label>
+            <input type="range" id="thresholdSlider" min="-120" max="-30" step="5" value="-50">
+        </div>
+        <div class="setting-item">
+            <label>💎 大小 <span class="value-display" id="sizeValue">12</span></label>
+            <input type="range" id="sizeSlider" min="6" max="20" step="1" value="12">
+        </div>
+        <div class="setting-item">
+            <label>🏓 托盘 <span class="value-display" id="paddleValue">80</span></label>
+            <input type="range" id="paddleSlider" min="50" max="150" step="5" value="80">
+        </div>
+        <div class="preset-buttons">
+            <button class="preset-btn" data-speed="1.2" data-density="0.015" data-red="0.15" data-threshold="-60">🌱 简单</button>
+            <button class="preset-btn active" data-speed="2.0" data-density="0.035" data-red="0.20" data-threshold="-50">⚖️ 普通</button>
+            <button class="preset-btn" data-speed="3.5" data-density="0.065" data-red="0.30" data-threshold="-40">🔥 困难</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ============================================================
+        // 1. DOM 元素引用
+        // ============================================================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreSpan = document.getElementById('scoreDisplay');
+        const levelSpan = document.getElementById('levelDisplay');
+        const highScoreSpan = document.getElementById('highScoreDisplay');
+        const speedSlider = document.getElementById('speedSlider');
+        const densitySlider = document.getElementById('densitySlider');
+        const redProbSlider = document.getElementById('redProbSlider');
+        const thresholdSlider = document.getElementById('thresholdSlider');
+        const sizeSlider = document.getElementById('sizeSlider');
+        const paddleSlider = document.getElementById('paddleSlider');
+        const speedValue = document.getElementById('speedValue');
+        const densityValue = document.getElementById('densityValue');
+        const redProbValue = document.getElementById('redProbValue');
+        const thresholdValue = document.getElementById('thresholdValue');
+        const sizeValue = document.getElementById('sizeValue');
+        const paddleValue = document.getElementById('paddleValue');
+        const presetBtns = document.querySelectorAll('.preset-btn');
+        const restartBtn = document.getElementById('restartButton');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const autoLevelCheck = document.getElementById('autoLevelCheck');
+
+        // ============================================================
+        // 2. 游戏常量
+        // ============================================================
+        const W = 400, H = 600;
+        const PLAYER_HEIGHT = 16;
+        const LEVEL_UP_SCORE = 100;
+
+        // ============================================================
+        // 3. 游戏状态变量
+        // ============================================================
+        let player = { x: 0 };
+        let playerWidth = 80;
+        let ballRadius = 12;
+        let balls = [];
+        let score = 0;
+        let gameOver = false;
+        let paused = false;
+        let animationFrameId = null;
+        let flashTimer = 0;
+        let levelUpTimer = 0;
+
+        // 参数（基础值，由滑块控制）
+        let speedBase = 2.0;
+        let spawnRate = 0.035;
+        let redProbability = 0.20;
+        let scoreThreshold = -50;
+
+        // 关卡系统
+        let currentLevel = 1;
+        let nextLevelScore = LEVEL_UP_SCORE;
+        // 自动升级标志（默认开启）
+        let autoLevelUp = true;
+
+        // 最高分（从 localStorage 读取）
+        let highScore = parseInt(localStorage.getItem('catchGameHighScore')) || 0;
+        highScoreSpan.textContent = highScore;
+
+        // ============================================================
+        // 4. 音效系统（Web Audio API）
+        // ============================================================
+        let audioCtx = null;
+
+        /** 初始化音频上下文（在用户交互时调用） */
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        /** 播放音调（频率、持续时间、类型） */
+        function playTone(freq, duration, type = 'sine', volume = 0.3) {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.value = volume;
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) { /* 静默失败 */ }
+        }
+
+        /** 得分音效（上升音） */
+        function playScoreSound() {
+            playTone(880, 0.15, 'sine', 0.25);
+            setTimeout(() => playTone(1100, 0.1, 'sine', 0.2), 100);
+        }
+
+        /** 扣分音效（下降音） */
+        function playMissSound() {
+            playTone(300, 0.3, 'sawtooth', 0.2);
+        }
+
+        /** 升级音效（庆祝） */
+        function playLevelUpSound() {
+            playTone(523, 0.15, 'sine', 0.3);
+            setTimeout(() => playTone(659, 0.15, 'sine', 0.3), 150);
+            setTimeout(() => playTone(784, 0.2, 'sine', 0.3), 300);
+        }
+
+        // ============================================================
+        // 5. 核心函数
+        // ============================================================
+
+        /** 重置游戏 */
+        function resetGame() {
+            player.x = W/2 - playerWidth/2;
+            balls = [];
+            score = 0;
+            currentLevel = 1;
+            nextLevelScore = LEVEL_UP_SCORE;
+            gameOver = false;
+            paused = false;
+            pauseBtn.textContent = '⏸️ 暂停';
+            flashTimer = 0;
+            levelUpTimer = 0;
+
+            // 从滑块读取参数（当自动升级关闭时，这些值将保持）
+            speedBase = parseFloat(speedSlider.value);
+            spawnRate = parseFloat(densitySlider.value);
+            redProbability = parseFloat(redProbSlider.value);
+            scoreThreshold = parseInt(thresholdSlider.value);
+            playerWidth = parseInt(paddleSlider.value);
+            ballRadius = parseInt(sizeSlider.value);
+
+            // 如果自动升级开启，应用当前关卡（但第1关无加成）
+            if (autoLevelUp) {
+                applyLevelStats();
+            }
+
+            updateScoreDisplay();
+            updateLevelDisplay();
+            for (let i = 0; i < 2; i++) spawnBall(true);
+        }
+
+        /** 应用关卡加成（在基础参数上增加） */
+        function applyLevelStats() {
+            // 基础值来自滑块，但我们要把滑块值作为基础，然后加上 (currentLevel-1)*增量
+            // 但我们不能修改滑块的实际显示值，所以直接计算并应用
+            // 注意：我们不再直接修改 speedBase 等，而是用额外的变量来存储最终值
+            // 为了简化，我们直接修改 speedBase 等，但保留滑块的值作为“基础”备用
+            // 我们使用一个函数来计算最终值，而不是直接修改
+            // 但为了保持简单，我们直接修改 speedBase 等，并在升级时增加它们
+            // 但我们希望滑块能反映当前值，所以在升级时同时更新滑块显示
+            // 我们引入“基础值”概念：滑块值是基础，实际值是基础 + 关卡加成
+            // 但我们之前的设计是直接修改 speedBase，所以为了兼容，我们继续这样
+            // 但为了让滑块显示实际值，我们在升级时更新滑块的值
+            // 但我们又希望用户关闭自动升级时，滑块值不再被自动修改
+            // 所以，当自动升级开启时，滑块显示实际值（基础+加成），但用户一旦手动滑动滑块，就会打破这个关系
+            // 所以我们采用另一种方式：当自动升级开启时，滑块显示实际值，但用户滑动后，我们就把自动升级关闭？
+            // 或者更好的方式：滑块始终显示实际值，升级时修改滑块值，用户滑动则覆盖。
+            // 这里我们这样设计：
+            // 当 autoLevelUp 为 true 时，升级会修改 speedBase 等并更新滑块值。
+            // 当用户手动滑动滑块时，我们会将 autoLevelUp 设为 false（因为用户想自定义）
+            // 这样逻辑清晰。
+            // 因此，在滑块事件中，我们将 autoLevelUp 设为 false。
+            // 同时，在预设按钮中，我们重置 autoLevelUp 为 true？或者由用户决定。
+            // 我们可以在预设按钮中不自动关闭 autoLevelUp，让用户自己决定是否开启。
+            // 但为了更好的体验，预设按钮可以重置为开启状态。
+            // 我们就这样做。
+
+            // 计算增量
+            const levelBonus = currentLevel - 1;
+            let finalSpeed = parseFloat(speedSlider.value) + levelBonus * 0.3;
+            let finalDensity = parseFloat(densitySlider.value) + levelBonus * 0.004;
+            let finalRed = parseFloat(redProbSlider.value) + levelBonus * 0.04;
+            let finalThreshold = parseInt(thresholdSlider.value) - levelBonus * 5;
+
+            // 限制上限
+            if (finalRed > 0.7) finalRed = 0.7;
+            // 更新实际使用的变量
+            speedBase = finalSpeed;
+            spawnRate = finalDensity;
+            redProbability = finalRed;
+            scoreThreshold = finalThreshold;
+
+            // 更新滑块显示，让滑块反映当前值（但用户拖动后会被覆盖）
+            speedSlider.value = finalSpeed;
+            densitySlider.value = finalDensity;
+            redProbSlider.value = finalRed;
+            thresholdSlider.value = finalThreshold;
+            // 更新数值显示
+            speedValue.textContent = finalSpeed.toFixed(1);
+            densityValue.textContent = finalDensity.toFixed(3);
+            redProbValue.textContent = finalRed.toFixed(2);
+            thresholdValue.textContent = finalThreshold;
+        }
+
+        /** 升级到下一关 */
+        function levelUp() {
+            currentLevel++;
+            // 播放升级音效
+            playLevelUpSound();
+            // 应用关卡统计
+            if (autoLevelUp) {
+                applyLevelStats();
+            } else {
+                // 如果自动升级关闭，只更新关卡编号，参数不变
+            }
+            // 设置下一关升级分数
+            nextLevelScore = score + LEVEL_UP_SCORE;
+            // 触发升级提示
+            levelUpTimer = 40;
+            updateLevelDisplay();
+        }
+
+        /** 生成宝石 */
+        function spawnBall(force = false) {
+            if (balls.length > 50 && !force) return false;
+            const x = 20 + Math.random() * (W - 40);
+            const dx = (Math.random() - 0.5) * 2.4;
+            const isRed = (Math.random() < redProbability);
+            let color;
+            if (isRed) {
+                color = `hsl(0, 85%, 65%)`;
+            } else {
+                let hue;
+                do {
+                    hue = Math.floor(Math.random() * 360);
+                } while ((hue >= 0 && hue < 20) || (hue >= 340 && hue < 360));
+                color = `hsl(${hue}, 80%, 60%)`;
+            }
+            const yOffset = -ballRadius * 2 - Math.random() * 70;
+            const dy = speedBase + (Math.random() - 0.5) * 0.8;
+            balls.push({
+                x, y: yOffset,
+                dx, dy: Math.max(0.5, dy),
+                radius: ballRadius,
+                color,
+                isTarget: isRed
+            });
+            return true;
+        }
+
+        /** 更新得分显示 */
+        function updateScoreDisplay() {
+            scoreSpan.textContent = score;
+            scoreSpan.style.color = (score < 0) ? '#ff6b6b' : '#c1d9e8';
+        }
+
+        /** 更新关卡显示 */
+        function updateLevelDisplay() {
+            levelSpan.textContent = currentLevel;
+        }
+
+        /** 更新最高分并存储 */
+        function updateHighScore() {
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('catchGameHighScore', highScore);
+                highScoreSpan.textContent = highScore;
+            }
+        }
+
+        // ============================================================
+        // 6. 游戏更新逻辑
+        // ============================================================
+        function update() {
+            if (gameOver || paused) return;
+
+            if (flashTimer > 0) flashTimer--;
+            if (levelUpTimer > 0) levelUpTimer--;
+
+            if (Math.random() < spawnRate) {
+                spawnBall();
+            }
+
+            const playerY = H - PLAYER_HEIGHT - 10;
+            const playerLeft = player.x;
+            const playerRight = player.x + playerWidth;
+
+            for (let i = balls.length - 1; i >= 0; i--) {
+                const b = balls[i];
+                b.x += b.dx;
+                b.y += b.dy;
+
+                if (b.x - b.radius < 0) { b.x = b.radius; b.dx *= -0.8; }
+                if (b.x + b.radius > W) { b.x = W - b.radius; b.dx *= -0.8; }
+
+                const ballBottom = b.y + b.radius;
+                const ballTop = b.y - b.radius;
+                const playerTop = playerY;
+                const playerBottom = playerY + PLAYER_HEIGHT;
+
+                if (ballBottom >= playerTop && ballTop <= playerBottom) {
+                    if (b.x >= playerLeft && b.x <= playerRight) {
+                        if (b.isTarget) {
+                            score += 10;
+                            updateScoreDisplay();
+                            playScoreSound();   // 得分音效
+                            if (score >= nextLevelScore) {
+                                levelUp();
+                            }
+                            flashTimer = 6;
+                        } else {
+                            // 接非目标，无反馈
+                        }
+                        balls.splice(i, 1);
+                        if (Math.random() < 0.3) spawnBall(true);
+                        continue;
+                    }
+                }
+
+                if (b.y - b.radius > H) {
+                    if (b.isTarget) {
+                        score -= 10;
+                        updateScoreDisplay();
+                        playMissSound();    // 扣分音效
+                        flashTimer = 15;
+                        if (score < scoreThreshold) {
+                            gameOver = true;
+                            updateHighScore(); // 游戏结束时更新最高分
+                            return;
+                        }
+                    }
+                    balls.splice(i, 1);
+                    continue;
+                }
+            }
+
+            if (balls.length < 2 && !gameOver) {
+                spawnBall(true);
+            }
+        }
+
+        // ============================================================
+        // 7. 绘图函数
+        // ============================================================
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+
+            // 闪屏
+            if (flashTimer > 0) {
+                const alpha = Math.min(flashTimer / 15, 0.4);
+                const color = (flashTimer > 10) ? `rgba(255,0,0,${alpha})` : `rgba(0,255,0,${alpha})`;
+                ctx.fillStyle = color;
+                ctx.fillRect(0, 0, W, H);
+            }
+
+            // 网格
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < W; i += 30) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke();
+            }
+            for (let i = 0; i < H; i += 30) {
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke();
+            }
+
+            // 宝石
+            for (const b of balls) {
+                if (b.isTarget) {
+                    ctx.shadowColor = '#ff3333';
+                    ctx.shadowBlur = 30;
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, b.radius + 6, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.15)';
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+                const gradient = ctx.createRadialGradient(
+                    b.x - 4, b.y - 4, 2,
+                    b.x, b.y, b.radius + 6
+                );
+                gradient.addColorStop(0, b.color);
+                gradient.addColorStop(0.7, b.color);
+                gradient.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.shadowColor = b.isTarget ? 'rgba(255, 50, 50, 0.8)' : 'rgba(255, 255, 255, 0.3)';
+                ctx.shadowBlur = b.isTarget ? 30 : 18;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                ctx.shadowBlur = 4;
+                ctx.beginPath();
+                ctx.arc(b.x - 3, b.y - 4, 4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(b.x - 5, b.y - 6, 2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.fill();
+                if (b.isTarget) {
+                    ctx.shadowBlur = 0;
+                    ctx.font = '16px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                    ctx.fillText('★', b.x, b.y - b.radius - 10);
+                }
+            }
+            ctx.shadowBlur = 0;
+
+            // 托盘
+            const playerY = H - PLAYER_HEIGHT - 10;
+            ctx.shadowColor = 'rgba(0, 200, 255, 0.5)';
+            ctx.shadowBlur = 20;
+            const grad = ctx.createLinearGradient(player.x, playerY, player.x, playerY + PLAYER_HEIGHT);
+            grad.addColorStop(0, '#6dc8f2');
+            grad.addColorStop(0.4, '#3a9bd5');
+            grad.addColorStop(1, '#1f5f85');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.roundRect(player.x, playerY, playerWidth, PLAYER_HEIGHT, 12);
+            ctx.fill();
+            ctx.shadowBlur = 8;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(player.x + 2, playerY + 2, playerWidth - 4, PLAYER_HEIGHT / 2, 8);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.beginPath();
+            ctx.roundRect(player.x + 20, playerY + 4, playerWidth - 40, 4, 4);
+            ctx.fill();
+
+            // 底部信息
+            ctx.shadowBlur = 0;
+            ctx.font = '14px "Segoe UI", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'bottom';
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.fillText(`底线: ${scoreThreshold}`, 10, H - 5);
+
+            // 升级提示
+            if (levelUpTimer > 0) {
+                ctx.shadowBlur = 0;
+                ctx.font = 'bold 48px "Segoe UI", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const alpha = Math.min(levelUpTimer / 20, 1);
+                ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+                ctx.shadowColor = 'rgba(255, 215, 0, 0.5)';
+                ctx.shadowBlur = 20;
+                ctx.fillText(`🎉 第 ${currentLevel} 关！`, W/2, H/2 - 40);
+                ctx.shadowBlur = 0;
+                ctx.font = '18px "Segoe UI", sans-serif';
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha*0.7})`;
+                ctx.fillText(`速度 ${speedBase.toFixed(1)} · 密度 ${spawnRate.toFixed(3)} · 红色 ${Math.round(redProbability*100)}%`, W/2, H/2 + 20);
+            }
+
+            // 暂停遮罩
+            if (paused && !gameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(0, 0, W, H);
+                ctx.shadowBlur = 0;
+                ctx.font = 'bold 48px "Segoe UI", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#f5c542';
+                ctx.fillText('⏸ 暂停中', W/2, H/2);
+            }
+
+            // 游戏结束
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, W, H);
+                ctx.shadowBlur = 0;
+                ctx.font = 'bold 44px "Segoe UI", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#ff6b6b';
+                ctx.shadowColor = '#ff0000';
+                ctx.shadowBlur = 30;
+                ctx.fillText('💔 游戏结束', W/2, H/2 - 30);
+                ctx.shadowBlur = 0;
+                ctx.font = '20px "Segoe UI", sans-serif';
+                ctx.fillStyle = '#c1d9e8';
+                ctx.fillText(`最终得分: ${score}`, W/2, H/2 + 40);
+                if (score === highScore && score > 0) {
+                    ctx.fillStyle = '#f5c542';
+                    ctx.fillText('🏆 新纪录！', W/2, H/2 + 80);
+                }
+                ctx.font = '16px "Segoe UI", sans-serif';
+                ctx.fillStyle = '#a0b8c8';
+                ctx.fillText('点击 "新一局" 再来一次', W/2, H/2 + 120);
+            }
+
+            ctx.shadowBlur = 0;
+        }
+
+        // Canvas roundRect
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            this.moveTo(x + r, y);
+            this.lineTo(x + w - r, y);
+            this.quadraticCurveTo(x + w, y, x + w, y + r);
+            this.lineTo(x + w, y + h - r);
+            this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            this.lineTo(x + r, y + h);
+            this.quadraticCurveTo(x, y + h, x, y + h - r);
+            this.lineTo(x, y + r);
+            this.quadraticCurveTo(x, y, x + r, y);
+            return this;
+        };
+
+        // ============================================================
+        // 8. 动画循环
+        // ============================================================
+        function gameLoop() {
+            update();
+            draw();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        // ============================================================
+        // 9. 控制事件
+        // ============================================================
+        function handleMove(e) {
+            if (gameOver || paused) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            let clientX;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                e.preventDefault();
+            } else {
+                clientX = e.clientX;
+            }
+            let canvasX = (clientX - rect.left) * scaleX;
+            canvasX = Math.max(0, Math.min(W, canvasX));
+            player.x = canvasX - playerWidth / 2;
+            player.x = Math.max(0, Math.min(W - playerWidth, player.x));
+        }
+        function handleStart(e) { handleMove(e); }
+
+        canvas.addEventListener('mousemove', handleMove);
+        canvas.addEventListener('touchmove', handleMove, { passive: false });
+        canvas.addEventListener('touchstart', handleStart, { passive: false });
+
+        // 键盘快捷键：P 暂停
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'p' || e.key === 'P') {
+                togglePause();
+                e.preventDefault();
+            }
+        });
+
+        // 暂停按钮
+        function togglePause() {
+            if (gameOver) return;
+            paused = !paused;
+            pauseBtn.textContent = paused ? '▶️ 继续' : '⏸️ 暂停';
+            // 如果暂停，音频上下文可能被挂起，但我们不处理
+        }
+        pauseBtn.addEventListener('click', togglePause);
+
+        // ============================================================
+        // 10. 设置面板交互
+        // ============================================================
+
+        // 滑块事件：用户手动滑动时，关闭自动升级（因为用户想自定义）
+        function onSliderChange() {
+            // 读取滑块值并更新对应变量
+            speedBase = parseFloat(speedSlider.value);
+            spawnRate = parseFloat(densitySlider.value);
+            redProbability = parseFloat(redProbSlider.value);
+            scoreThreshold = parseInt(thresholdSlider.value);
+            playerWidth = parseInt(paddleSlider.value);
+            ballRadius = parseInt(sizeSlider.value);
+            // 更新显示
+            speedValue.textContent = speedBase.toFixed(1);
+            densityValue.textContent = spawnRate.toFixed(3);
+            redProbValue.textContent = redProbability.toFixed(2);
+            thresholdValue.textContent = scoreThreshold;
+            sizeValue.textContent = ballRadius;
+            paddleValue.textContent = playerWidth;
+            // 如果自动升级开启，则关闭它（用户想要自定义）
+            if (autoLevelUp) {
+                autoLevelUp = false;
+                autoLevelCheck.checked = false;
+                // 并且重置关卡等级为1（但保留当前参数）
+                currentLevel = 1;
+                nextLevelScore = LEVEL_UP_SCORE;
+                updateLevelDisplay();
+            }
+            // 取消预设高亮
+            presetBtns.forEach(btn => btn.classList.remove('active'));
+        }
+
+        speedSlider.addEventListener('input', onSliderChange);
+        densitySlider.addEventListener('input', onSliderChange);
+        redProbSlider.addEventListener('input', onSliderChange);
+        thresholdSlider.addEventListener('input', onSliderChange);
+        sizeSlider.addEventListener('input', onSliderChange);
+        paddleSlider.addEventListener('input', onSliderChange);
+
+        // 自动升级复选框
+        autoLevelCheck.addEventListener('change', function() {
+            autoLevelUp = this.checked;
+            if (autoLevelUp) {
+                // 重新应用关卡加成（基于当前滑块值）
+                // 先重置关卡等级为1？不用，保持当前等级
+                // 但需要重新计算参数
+                applyLevelStats();
+                // 更新显示
+                speedValue.textContent = speedBase.toFixed(1);
+                densityValue.textContent = spawnRate.toFixed(3);
+                redProbValue.textContent = redProbability.toFixed(2);
+                thresholdValue.textContent = scoreThreshold;
+                // 同时滑块已由 applyLevelStats 更新
+            } else {
+                // 关闭自动升级，滑块保持当前值不变
+                // 但当前 speedBase 等是实际值，滑块也已经显示实际值，无需改变
+            }
+        });
+
+        // 预设按钮：设置基础参数，并重置自动升级为开启状态
+        presetBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const speed = parseFloat(this.dataset.speed);
+                const density = parseFloat(this.dataset.density);
+                const red = parseFloat(this.dataset.red);
+                const threshold = parseInt(this.dataset.threshold);
+                // 设置滑块值
+                speedSlider.value = speed;
+                densitySlider.value = density;
+                redProbSlider.value = red;
+                thresholdSlider.value = threshold;
+                // 同时更新变量
+                speedBase = speed;
+                spawnRate = density;
+                redProbability = red;
+                scoreThreshold = threshold;
+                // 更新显示
+                speedValue.textContent = speed.toFixed(1);
+                densityValue.textContent = density.toFixed(3);
+                redProbValue.textContent = red.toFixed(2);
+                thresholdValue.textContent = threshold;
+                // 重置关卡
+                currentLevel = 1;
+                nextLevelScore = LEVEL_UP_SCORE;
+                updateLevelDisplay();
+                // 开启自动升级（用户使用预设，通常希望自动升级）
+                autoLevelUp = true;
+                autoLevelCheck.checked = true;
+                // 应用关卡加成（目前第一关，加成0）
+                applyLevelStats();
+                // 高亮当前按钮
+                presetBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                // 如果游戏未结束，重置宝石（可选），但为了体验，不重置，让用户自行重启
+            });
+        });
+
+        // 重启按钮
+        restartBtn.addEventListener('click', function() {
+            // 重置前更新最高分（如果游戏结束但未更新？已在结束更新）
+            if (gameOver) {
+                // 已经更新过了
+            }
+            resetGame();
+            // 如果暂停状态，取消暂停
+            if (paused) {
+                paused = false;
+                pauseBtn.textContent = '⏸️ 暂停';
+            }
+        });
+
+        // ============================================================
+        // 11. 启动
+        // ============================================================
+        // 初始化滑块显示
+        speedValue.textContent = speedSlider.value;
+        densityValue.textContent = densitySlider.value;
+        redProbValue.textContent = redProbSlider.value;
+        thresholdValue.textContent = thresholdSlider.value;
+        sizeValue.textContent = sizeSlider.value;
+        paddleValue.textContent = paddleSlider.value;
+
+        // 初始启用自动升级
+        autoLevelUp = true;
+        autoLevelCheck.checked = true;
+
+        // 重置并开始
+        resetGame();
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        gameLoop();
+
+        console.log('🎯 完全版已启动！按 P 暂停，关闭"自动升级"即可完全自定义难度。');
+    })();
+</script>
+</body>
+</html>
